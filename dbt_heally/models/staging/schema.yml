@@ -1,0 +1,31 @@
+version: 2
+models:
+  - name: stg_hrrp
+    description: One row per hospital and HRRP measure, typed. CMS suppression text (N/A, Too Few to Report) becomes null; the footnote code keeps the reason.
+    columns:
+      - name: facility_id
+        description: CMS Certification Number, six characters, leading zeros preserved.
+        tests: [not_null]
+      - name: measure_code
+        tests:
+          - not_null
+          - accepted_values: {values: [AMI, CABG, COPD, HF, HIP-KNEE, PN]}
+      - name: excess_readmission_ratio
+        description: Predicted divided by expected readmission rate. Above 1 means more readmissions than expected for the patient mix.
+        tests:
+          - value_between: {min_value: 0.2, max_value: 3}
+      - name: discharges
+        tests:
+          - value_between: {min_value: 0, max_value: 100000}
+    tests:
+      - unique:
+          column_name: "facility_id || '|' || measure_code"
+  - name: stg_hospital_info
+    description: One row per hospital from Hospital General Information, typed.
+    columns:
+      - name: facility_id
+        tests: [unique, not_null]
+      - name: overall_star_rating
+        description: CMS overall star rating 1 to 5. Null when CMS reports Not Available.
+        tests:
+          - value_between: {min_value: 1, max_value: 5}

@@ -1,0 +1,60 @@
+version: 2
+models:
+  - name: dim_hospital
+    description: One row per hospital. Includes HRRP hospitals missing from General Information, flagged by in_general_info.
+    columns:
+      - name: facility_id
+        tests: [unique, not_null]
+      - name: in_general_info
+        tests: [not_null]
+  - name: dim_measure
+    description: The six HRRP conditions with readable labels.
+    columns:
+      - name: measure_code
+        tests: [unique, not_null]
+  - name: fct_hospital_readmissions
+    description: Grain is hospital and condition. Excess readmissions are discharges times (predicted minus expected rate) divided by 100, only where CMS reports all three.
+    columns:
+      - name: facility_id
+        tests:
+          - not_null
+          - relationships: {to: ref('dim_hospital'), field: facility_id}
+      - name: measure_code
+        tests:
+          - relationships: {to: ref('dim_measure'), field: measure_code}
+    tests:
+      - unique:
+          column_name: "facility_id || '|' || measure_code"
+  - name: mart_hospital_scorecard
+    description: One row per hospital for exploration and self-service reporting.
+    columns:
+      - name: facility_id
+        tests: [unique, not_null]
+  - name: mart_state_exposure
+    description: Readmission exposure by state, for health plan and employer partner reporting.
+    columns:
+      - name: state
+        tests: [unique, not_null]
+  - name: mart_navigator_worklist
+    description: Hospital and condition pairs ranked by excess readmissions with priority tiers A, B and C. Synced to the CRM by reverse ETL.
+    columns:
+      - name: priority_tier
+        tests:
+          - accepted_values: {values: [A, B, C]}
+      - name: cumulative_share
+        tests:
+          - value_between: {min_value: 0, max_value: 1}
+    tests:
+      - unique:
+          column_name: "facility_id || '|' || measure_code"
+  - name: mart_business_case
+    description: One row of headline KPIs. Cost and avertable share are assumptions.
+  - name: mart_savings_sensitivity
+    description: Savings under 4 avertable shares and 3 cost assumptions.
+exposures:
+  - name: heally_dashboard
+    type: dashboard
+    maturity: medium
+    owner: {name: Analytics Engineering, email: analytics@example.com}
+    description: Self-service readmission exposure dashboard for Care Team, Client Success and Marketing.
+    depends_on: [ref('mart_state_exposure'), ref('mart_hospital_scorecard'), ref('mart_navigator_worklist'), ref('mart_business_case')]
