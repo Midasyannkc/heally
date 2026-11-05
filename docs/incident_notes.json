@@ -1,0 +1,17 @@
+[
+  {"n": 1, "title": "Source registry listed 14 of 38 hospital columns",
+   "found": "first load of the real Hospital General Information file (real data)",
+   "detail": "The loader's contract for the hospital file listed 14 columns, but the real CMS file has 38. Every first load therefore reported 24 added columns, which would bury a genuine drift alert in noise. The registry now lists all 38 columns, so only a real change is reported."},
+  {"n": 2, "title": "CMS suppression text crashed typed staging",
+   "found": "profiling the real files, then the first dbt run (real data)",
+   "detail": "CMS puts text inside numeric columns: N/A for 10,088 discharge counts, Too Few to Report for 3,683 readmission counts, and Not Available for 2,245 star ratings. A plain cast stopped the build. Staging now uses try_cast, so suppressed cells become null and the footnote code keeps the reason."},
+  {"n": 3, "title": "20 hospitals in HRRP are missing from General Information",
+   "found": "profiling the real files (real data)",
+   "detail": "The fact table inner-joined the hospital dimension, so readmission rows for 20 hospitals would have disappeared with no error. dim_hospital now keeps those hospitals, flagged in_general_info = false, and a relationships test guards the join."},
+  {"n": 4, "title": "A new CMS condition code was silently dropped from the worklist",
+   "found": "SIMULATED CMS refresh while reviewing joins; the current real files are not affected",
+   "detail": "The worklist inner-joined a label seed, so a condition CMS adds in a later refresh would vanish from the work queue. The join is now a left join with an Unlabeled measure fallback, and a singular test reconciles the worklist to the fact table."},
+  {"n": 5, "title": "Governed metric disagreed with the marts",
+   "found": "review of metric and mart definitions; LATENT, the current real files do not trigger it",
+   "detail": "The semantic layer measure summed excess readmissions for every pair, while the marts count only pairs with reportable volume (25 or more discharges). With a small hospital that has a published ratio, a self-service user would see a different number than the dashboard. The measure now applies the same rule and a test compares the two."}
+]

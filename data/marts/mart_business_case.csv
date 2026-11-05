@@ -1,0 +1,2 @@
+performance_period_years,worklist_pairs,tier_a_pairs,tier_a_share_of_pairs,excess_readmissions_period,excess_readmissions_per_year,tier_a_share_of_excess,tier_a_excess_per_1000_discharges,all_pairs_excess_per_1000_discharges,assumed_avertable_share,assumed_cost_per_readmission_usd,avoided_readmissions_per_year_all_tiers,avoided_readmissions_per_year_tier_a,savings_usd_per_year_all_tiers,savings_usd_per_year_tier_a
+3.0,4316,457,0.1059,12245.3,4081.8,0.5002,19.9,10.8,0.1,15000,408.0,204.0,6122645.0,3062585.0

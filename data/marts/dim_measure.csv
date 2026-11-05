@@ -1,0 +1,7 @@
+measure_code,condition_label,condition_group
+AMI,Heart attack,Cardiac
+CABG,Coronary artery bypass graft surgery,Cardiac
+COPD,Chronic obstructive pulmonary disease,Respiratory
+HF,Heart failure,Cardiac
+HIP-KNEE,Hip or knee replacement,Orthopedic
+PN,Pneumonia,Respiratory

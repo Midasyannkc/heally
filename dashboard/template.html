@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Heally readmission exposure</title>
+<style>
+:root{--bg:#f6f7f4;--card:#fff;--ink:#1d2a26;--mute:#5d6b66;--line:#dfe4de;--a:#1f7a5c;--b:#d98e04;--c:#8a9a94;--bad:#b3402a}
+@media (prefers-color-scheme:dark){:root{--bg:#121816;--card:#1a2320;--ink:#e8efec;--mute:#9bada6;--line:#2a3733;--a:#4fc79d;--b:#f0b43a;--c:#6f817a;--bad:#ef8a73}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:24px 16px 56px}
+h1{font-size:24px;margin:0 0 4px}p.sub{color:var(--mute);margin:0 0 20px}
+.grid{display:grid;gap:12px}.kpis{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.kpi .v{font-size:28px;font-weight:650}.kpi .l{color:var(--mute);font-size:13px}
+.two{grid-template-columns:repeat(auto-fit,minmax(320px,1fr));margin-top:12px}
+h2{font-size:16px;margin:0 0 10px}.note{color:var(--mute);font-size:12.5px;margin-top:8px}
+.bar{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:13px}.bar .n{width:34px}.bar .t{flex:1;background:var(--line);border-radius:4px;height:14px}.bar .f{background:var(--a);height:14px;border-radius:4px}.bar .x{width:64px;text-align:right;color:var(--mute)}
+.controls{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0 8px}select{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}th{color:var(--mute);font-weight:600}td.r,th.r{text-align:right}
+.tier{display:inline-block;min-width:22px;text-align:center;border-radius:6px;padding:1px 6px;color:#fff;font-weight:650}.tA{background:var(--a)}.tB{background:var(--b)}.tC{background:var(--c)}
+svg text{fill:var(--mute);font-size:11px}.scroll{overflow-x:auto}
+</style></head><body><main>
+<h1>Where should care navigators start?</h1>
+<p class="sub">Hospital readmission exposure from CMS Hospital Readmissions Reduction Program data (FY 2026, discharges Jul 2021 to Jun 2024). Medicare fee-for-service patients only.</p>
+<div class="grid kpis" id="kpis"></div>
+<div class="controls"><label>State <select id="state"></select></label><label>Tier <select id="tier"><option value="">All tiers</option><option>A</option><option>B</option><option>C</option></select></label></div>
+<div class="grid two">
+ <div class="card"><h2>Concentration: share of excess readmissions covered</h2><div id="curve"></div><div class="note">Working the largest pairs first. The dashed line marks 50%.</div></div>
+ <div class="card"><h2>Top states by excess readmissions</h2><div id="states"></div><div class="note">Selected state is highlighted. Numbers cover the whole CMS window.</div></div>
+</div>
+<div class="grid two">
+ <div class="card"><h2>CMS star rating vs excess ratio</h2><div id="stars"></div><div class="note">Above 1.0 means more readmissions than expected. Lower-rated hospitals sit higher.</div></div>
+ <div class="card"><h2>Annual savings scenarios</h2><div class="scroll"><table id="sens"></table></div><div class="note">Assumptions, not CMS data: share of excess readmissions navigators avert (rows) and cost per readmission (columns).</div></div>
+</div>
+<div class="card" style="margin-top:12px"><h2>Navigator worklist <span id="count" style="color:var(--mute);font-weight:400"></span></h2><div class="scroll"><table id="wl"></table></div></div>
+<p class="note">Source: CMS Provider Data Catalog, <a href="https://data.cms.gov/provider-data/dataset/9n3s-kdb3">HRRP 9n3s-kdb3</a> and <a href="https://data.cms.gov/provider-data/dataset/xubh-q36u">Hospital General Information xubh-q36u</a>. Excess readmissions are estimated as discharges x (predicted - expected rate) / 100 where CMS reports all three.</p>
+</main>
+<script>
+const D=__DATA__;const $=id=>document.getElementById(id);const f=(n,d=0)=>Number(n).toLocaleString('en-US',{maximumFractionDigits:d});
+const k=D.kpi;
+$('kpis').innerHTML=[[f(k.worklist_pairs),'hospital-condition pairs with excess readmissions'],[f(k.tier_a_share_of_pairs*100,1)+'%','of pairs hold '+f(k.tier_a_share_of_excess*100,0)+'% of the excess (tier A)'],[f(k.excess_readmissions_per_year),'excess readmissions per year (estimated)'],['$'+f(k.savings_usd_per_year_tier_a/1e6,1)+'M','per year if tier A work averts '+f(k.assumed_avertable_share*100,0)+'% (assumption)']]
+ .map(([v,l])=>`<div class="card kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+const sel=$('state');sel.innerHTML='<option value="">All states</option>'+D.states.map(s=>`<option>${s.state}</option>`).join('');
+function curve(){const w=D.worklist,n=w.length,step=Math.max(1,Math.floor(n/120));const W=420,H=220,p=34;
+ const pts=w.filter((_,i)=>i%step===0).map((r,i)=>[p+(r.outreach_rank/n)*(W-p-8),H-p-(r.cumulative_share)*(H-p-8)]);
+ $('curve').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%"><line x1="${p}" y1="${H-p}" x2="${W-8}" y2="${H-p}" stroke="var(--line)"/><line x1="${p}" y1="8" x2="${p}" y2="${H-p}" stroke="var(--line)"/>
+ <line x1="${p}" y1="${H-p-(H-p-8)*.5}" x2="${W-8}" y2="${H-p-(H-p-8)*.5}" stroke="var(--c)" stroke-dasharray="4 4"/>
+ <polyline fill="none" stroke="var(--a)" stroke-width="2.4" points="${pts.map(q=>q.join(',')).join(' ')}"/>
+ <text x="${p}" y="${H-12}">0%</text><text x="${W-8}" y="${H-12}" text-anchor="end">100% of pairs</text><text x="2" y="${H-p+4}">0%</text><text x="2" y="16">100%</text></svg>`}
+function states(){const s=D.states.slice(0,12),m=Math.max(...s.map(x=>x.excess_readmissions));
+ $('states').innerHTML=s.map(x=>`<div class="bar"><span class="n">${x.state}</span><span class="t"><div class="f" style="width:${x.excess_readmissions/m*100}%;${sel.value===x.state?'background:var(--b)':''}"></div></span><span class="x">${f(x.excess_readmissions)}</span></div>`).join('')}
+function stars(){const s=D.stars;$('stars').innerHTML=s.map(x=>{const d=(x.avg_ratio-1)*100;return `<div class="bar"><span class="n">${x.stars} star</span><span class="t" style="position:relative"><div class="f" style="position:absolute;${d>=0?'left:50%':'right:50%'};width:${Math.abs(d)*5}%;background:${d>=0?'var(--bad)':'var(--a)'}"></div></span><span class="x">${x.avg_ratio.toFixed(3)}</span></div>`}).join('')}
+function sens(){const costs=[...new Set(D.sens.map(r=>r.cost_per_readmission_usd))],sh=[...new Set(D.sens.map(r=>r.avertable_share))];
+ $('sens').innerHTML='<tr><th>Averted share</th>'+costs.map(c=>`<th class="r">$${f(c)} each</th>`).join('')+'</tr>'+sh.map(s=>'<tr><td>'+f(s*100)+'%</td>'+costs.map(c=>{const r=D.sens.find(x=>x.avertable_share==s&&x.cost_per_readmission_usd==c);return `<td class="r">$${f(r.savings_usd_per_year/1e6,1)}M</td>`}).join('')+'</tr>').join('')}
+function table(){const st=sel.value,t=$('tier').value;const r=D.worklist.filter(x=>(!st||x.state===st)&&(!t||x.priority_tier===t));$('count').textContent='('+f(r.length)+' pairs)';
+ $('wl').innerHTML='<tr><th>#</th><th>Hospital</th><th>State</th><th>County</th><th>Condition</th><th class="r">Stars</th><th class="r">Discharges</th><th class="r">Ratio</th><th class="r">Excess</th><th>Tier</th></tr>'+
+ r.slice(0,40).map(x=>`<tr><td>${x.outreach_rank}</td><td>${x.facility_name}</td><td>${x.state}</td><td>${x.county||''}</td><td>${x.condition_label}</td><td class="r">${x.overall_star_rating??'n/a'}</td><td class="r">${f(x.discharges)}</td><td class="r">${Number(x.excess_readmission_ratio).toFixed(3)}</td><td class="r">${f(x.excess_readmissions,1)}</td><td><span class="tier t${x.priority_tier}">${x.priority_tier}</span></td></tr>`).join('')}
+function all(){states();table()}sel.onchange=all;$('tier').onchange=table;curve();stars();sens();all();
+</script></body></html>
