@@ -1,0 +1,192 @@
+{
+ "curve": [
+  [
+   0,
+   0
+  ],
+  [
+   10,
+   48.6
+  ],
+  [
+   20,
+   66.9
+  ],
+  [
+   30,
+   78.1
+  ],
+  [
+   40,
+   85.5
+  ],
+  [
+   50,
+   90.7
+  ],
+  [
+   60,
+   94.3
+  ],
+  [
+   70,
+   96.9
+  ],
+  [
+   80,
+   98.6
+  ],
+  [
+   90,
+   99.6
+  ],
+  [
+   100,
+   100.0
+  ]
+ ],
+ "states": [
+  [
+   "FL",
+   1421.55,
+   159
+  ],
+  [
+   "CA",
+   1278.61,
+   224
+  ],
+  [
+   "NY",
+   871.02,
+   119
+  ],
+  [
+   "MA",
+   812.59,
+   52
+  ],
+  [
+   "NJ",
+   707.51,
+   61
+  ],
+  [
+   "IL",
+   704.89,
+   103
+  ],
+  [
+   "TX",
+   678.14,
+   191
+  ],
+  [
+   "PA",
+   637.35,
+   114
+  ]
+ ],
+ "stars": [
+  [
+   1,
+   1.045
+  ],
+  [
+   2,
+   1.023
+  ],
+  [
+   3,
+   1.006
+  ],
+  [
+   4,
+   0.986
+  ],
+  [
+   5,
+   0.964
+  ]
+ ],
+ "cond": [
+  [
+   "Heart failure",
+   4856.0
+  ],
+  [
+   "Pneumonia",
+   4526.0
+  ],
+  [
+   "Heart attack",
+   1130.0
+  ],
+  [
+   "Chronic obstructive pulmonary disease",
+   1072.0
+  ],
+  [
+   "Coronary artery bypass graft surgery",
+   341.0
+  ],
+  [
+   "Hip or knee replacement",
+   321.0
+  ]
+ ],
+ "kpi": {
+  "performance_period_years": 3.0,
+  "worklist_pairs": 4316.0,
+  "tier_a_pairs": 457.0,
+  "tier_a_share_of_pairs": 0.1059,
+  "excess_readmissions_period": 12245.3,
+  "excess_readmissions_per_year": 4081.8,
+  "tier_a_share_of_excess": 0.5002,
+  "tier_a_excess_per_1000_discharges": 19.9,
+  "all_pairs_excess_per_1000_discharges": 10.8,
+  "assumed_avertable_share": 0.1,
+  "assumed_cost_per_readmission_usd": 15000.0,
+  "avoided_readmissions_per_year_all_tiers": 408.0,
+  "avoided_readmissions_per_year_tier_a": 204.0,
+  "savings_usd_per_year_all_tiers": 6122645.0,
+  "savings_usd_per_year_tier_a": 3062585.0
+ },
+ "inc": [
+  [
+   "INC-1",
+   "Source registry listed 14 of 38 hospital columns",
+   "first load of the real Hospital General Information file (real data)",
+   "`39e13ab`",
+   "`0e3dbec`"
+  ],
+  [
+   "INC-2",
+   "CMS suppression text crashed typed staging",
+   "profiling the real files, then the first dbt run (real data)",
+   "`f0326e6`",
+   "`6c68745`"
+  ],
+  [
+   "INC-3",
+   "20 hospitals in HRRP are missing from General Information",
+   "profiling the real files (real data)",
+   "`12b18f5`",
+   "`7932789`"
+  ],
+  [
+   "INC-4",
+   "A new CMS condition code was silently dropped from the worklist",
+   "SIMULATED CMS refresh while reviewing joins; the current real files are not affected",
+   "`4f65aa4`",
+   "`e4abafa`"
+  ],
+  [
+   "INC-5",
+   "Governed metric disagreed with the marts",
+   "review of metric and mart definitions; LATENT, the current real files do not trigger it",
+   "`8fff0a5`",
+   "`0cd64f1`"
+  ]
+ ]
+}
