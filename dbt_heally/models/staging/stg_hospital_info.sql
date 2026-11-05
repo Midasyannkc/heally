@@ -10,6 +10,6 @@ select
     hospital_ownership                                as ownership,
     emergency_services = 'Yes'                        as has_emergency_services,
     meets_criteria_for_birthing_friendly_designation = 'Y' as is_birthing_friendly,
-    cast(hospital_overall_rating as integer)          as overall_star_rating,
-    cast(count_of_readm_measures_worse as integer)    as readm_measures_worse
+    try_cast(hospital_overall_rating as integer)          as overall_star_rating,
+    try_cast(count_of_readm_measures_worse as integer)    as readm_measures_worse
 from {{ source('raw', 'hospital_info') }}
