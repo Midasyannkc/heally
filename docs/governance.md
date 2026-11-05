@@ -5,7 +5,7 @@
 | Ownership | Every model has a description; the dashboard is declared as a dbt exposure with an owner | `dbt_heally/models/marts/schema.yml` |
 | Classification | Public CMS data, no member or patient data. Nothing here is PHI. | `SOURCE.md` |
 | Contracts | Source registry: a renamed or missing column blocks the load and is logged; added columns are loaded and logged | `heally/config.py`, `heally/sync.py` |
-| Quality | 30 data tests, 3 unit tests, 4 singular reconciliation tests, 4 observability monitors | `dbt_heally/tests/`, `heally/monitors.py` |
+| Quality | 30 data tests, 3 unit tests, 5 singular reconciliation tests, 4 observability monitors | `dbt_heally/tests/`, `heally/monitors.py` |
 | Access | Snowflake roles: TRANSFORMER writes, ANALYST reads marts only (written, not run) | `snowflake/02_stage_and_pipe.sql` |
 | Freshness | dbt source freshness warns at 2 days and errors at 7 days | `dbt_heally/models/staging/sources.yml` |
 | Discoverability | Static dbt docs site with lineage, a metric dictionary in the semantic layer, and a data notebook | `docs/dbt_docs.html`, `notebooks/explore_readmissions.ipynb` |
