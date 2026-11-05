@@ -69,6 +69,6 @@ def test_semantic_layer_parses_and_its_measures_reproduce_the_marts(run1):
     assert {"excess_readmissions", "total_discharges", "share_pairs_above_expected", "excess_readmissions_per_1000_discharges"} <= metrics
     measures = {m["name"]: m["expr"] for s in sm["semantic_models"] for m in s["measures"]}
     con = duckdb.connect(run1["db"], read_only=True)
-    metric_total = con.execute(f"select sum({measures['excess_readmissions_positive']}) from marts.fct_hospital_readmissions where is_reportable_volume").fetchone()[0]
+    metric_total = con.execute(f"select sum({measures['excess_readmissions_positive']}) from marts.fct_hospital_readmissions").fetchone()[0]
     mart_total = con.execute("select sum(excess_readmissions) from marts.mart_state_exposure").fetchone()[0]
     assert abs(metric_total - mart_total) < 1

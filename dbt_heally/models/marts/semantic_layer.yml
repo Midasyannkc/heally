@@ -28,9 +28,9 @@ semantic_models:
         agg: sum
         expr: discharges
       - name: excess_readmissions_positive
-        description: Excess readmissions, floored at zero per hospital and condition.
+        description: Excess readmissions floored at zero per hospital and condition, counting only pairs with reportable volume (same rule as the marts).
         agg: sum
-        expr: greatest(excess_readmissions, 0)
+        expr: case when is_reportable_volume then greatest(excess_readmissions, 0) else 0 end
       - name: pairs_with_ratio
         agg: count
         expr: excess_readmission_ratio
