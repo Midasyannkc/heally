@@ -57,3 +57,18 @@ def test_schema_drift_stops_the_run_before_any_downstream_step(run1, tmp_path):
     assert sqlite3.connect(run1["crm"]).execute("select count(*) from sync_log").fetchone()[0] == before
     m = json.load(open(tmp_path / "m.json"))
     assert m["passed"] is False and m["failed_step"] == "sync"
+
+
+def test_semantic_layer_parses_and_its_measures_reproduce_the_marts(run1):
+    """dbt parses the semantic models into semantic_manifest.json; applying each measure's expression to the fact table must equal the mart totals."""
+    from tests.dbt_helper import dbt
+    assert dbt(run1["db"], "parse").returncode == 0
+    from tests.conftest import ROOT
+    sm = json.load(open(os.path.join(ROOT, "out", "dbt_target", "semantic_manifest.json")))
+    metrics = {m["name"] for m in sm["metrics"]}
+    assert {"excess_readmissions", "total_discharges", "share_pairs_above_expected", "excess_readmissions_per_1000_discharges"} <= metrics
+    measures = {m["name"]: m["expr"] for s in sm["semantic_models"] for m in s["measures"]}
+    con = duckdb.connect(run1["db"], read_only=True)
+    metric_total = con.execute(f"select sum({measures['excess_readmissions_positive']}) from marts.fct_hospital_readmissions where is_reportable_volume").fetchone()[0]
+    mart_total = con.execute("select sum(excess_readmissions) from marts.mart_state_exposure").fetchone()[0]
+    assert abs(metric_total - mart_total) < 1

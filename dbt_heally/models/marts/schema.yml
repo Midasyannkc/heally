@@ -51,6 +51,13 @@ models:
     description: One row of headline KPIs. Cost and avertable share are assumptions.
   - name: mart_savings_sensitivity
     description: Savings under 4 avertable shares and 3 cost assumptions.
+  - name: metricflow_time_spine
+    description: Daily calendar for the semantic layer.
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        granularity: day
 exposures:
   - name: heally_dashboard
     type: dashboard

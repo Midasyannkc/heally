@@ -1,0 +1,67 @@
+version: 2
+semantic_models:
+  - name: readmissions
+    description: Hospital and condition readmission facts, the governed source for self-service metrics.
+    model: ref('fct_hospital_readmissions')
+    defaults:
+      agg_time_dimension: performance_end
+    entities:
+      - name: readmission_row
+        type: primary
+        expr: facility_id || '|' || measure_code
+      - name: hospital
+        type: foreign
+        expr: facility_id
+    dimensions:
+      - name: performance_end
+        type: time
+        type_params: {time_granularity: day}
+        expr: performance_end_date
+      - name: state
+        type: categorical
+      - name: measure_code
+        type: categorical
+      - name: is_above_expected
+        type: categorical
+    measures:
+      - name: discharges
+        agg: sum
+        expr: discharges
+      - name: excess_readmissions_positive
+        description: Excess readmissions, floored at zero per hospital and condition.
+        agg: sum
+        expr: greatest(excess_readmissions, 0)
+      - name: pairs_with_ratio
+        agg: count
+        expr: excess_readmission_ratio
+      - name: pairs_above_expected
+        agg: sum
+        expr: case when is_above_expected then 1 else 0 end
+metrics:
+  - name: excess_readmissions
+    label: Excess readmissions
+    description: Estimated readmissions above expected, summed over the CMS performance window.
+    type: simple
+    type_params: {measure: excess_readmissions_positive}
+  - name: total_discharges
+    label: Discharges
+    type: simple
+    type_params: {measure: discharges}
+  - name: pairs_above_expected
+    label: Pairs above expected
+    type: simple
+    type_params: {measure: pairs_above_expected}
+  - name: pairs_with_ratio
+    label: Pairs with a reported ratio
+    type: simple
+    type_params: {measure: pairs_with_ratio}
+  - name: share_pairs_above_expected
+    label: Share of hospital-condition pairs above expected
+    type: ratio
+    type_params: {numerator: pairs_above_expected, denominator: pairs_with_ratio}
+  - name: excess_readmissions_per_1000_discharges
+    label: Excess readmissions per 1,000 discharges
+    type: derived
+    type_params:
+      expr: 1000 * excess_readmissions / total_discharges
+      metrics: [excess_readmissions, total_discharges]
