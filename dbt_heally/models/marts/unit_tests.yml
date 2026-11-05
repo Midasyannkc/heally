@@ -1,0 +1,57 @@
+version: 2
+unit_tests:
+  - name: worklist_tiers_by_cumulative_share
+    description: Negative excess and sub-volume pairs are excluded. Cumulative shares are 40, 60, 80, 100 percent, so with a 50 percent tier A line the pair that crosses it (second) is still A, and a pair starting exactly at the 80 percent tier B line is C.
+    model: mart_navigator_worklist
+    overrides:
+      vars: {tier_a_cumulative_share: 0.5, tier_b_cumulative_share: 0.8}
+    given:
+      - input: ref('fct_hospital_readmissions')
+        rows:
+          - {facility_id: "000001", measure_code: HF, discharges: 100, excess_readmission_ratio: 1.2, excess_readmissions: 40, is_reportable_volume: true}
+          - {facility_id: "000002", measure_code: HF, discharges: 100, excess_readmission_ratio: 1.1, excess_readmissions: 20, is_reportable_volume: true}
+          - {facility_id: "000003", measure_code: HF, discharges: 100, excess_readmission_ratio: 1.1, excess_readmissions: 20, is_reportable_volume: true}
+          - {facility_id: "000004", measure_code: HF, discharges: 100, excess_readmission_ratio: 1.1, excess_readmissions: 20, is_reportable_volume: true}
+          - {facility_id: "000005", measure_code: HF, discharges: 100, excess_readmission_ratio: 0.9, excess_readmissions: -10, is_reportable_volume: true}
+          - {facility_id: "000006", measure_code: HF, discharges: 10, excess_readmission_ratio: 1.5, excess_readmissions: 5, is_reportable_volume: false}
+      - input: ref('dim_hospital')
+        rows:
+          - {facility_id: "000001", facility_name: A}
+          - {facility_id: "000002", facility_name: B}
+          - {facility_id: "000003", facility_name: C}
+          - {facility_id: "000004", facility_name: D}
+          - {facility_id: "000005", facility_name: E}
+          - {facility_id: "000006", facility_name: F}
+      - input: ref('dim_measure')
+        rows:
+          - {measure_code: HF, condition_label: Heart failure}
+    expect:
+      rows:
+        - {facility_id: "000001", priority_tier: A, outreach_rank: 1}
+        - {facility_id: "000002", priority_tier: A, outreach_rank: 2}
+        - {facility_id: "000003", priority_tier: B, outreach_rank: 3}
+        - {facility_id: "000004", priority_tier: C, outreach_rank: 4}
+  - name: excess_readmissions_formula
+    model: int_hospital_measure_excess
+    overrides:
+      vars: {min_reportable_discharges: 25}
+    given:
+      - input: ref('stg_hrrp')
+        rows:
+          - {facility_id: "000001", measure_code: HF, discharges: 200, excess_readmission_ratio: 1.1, predicted_readmission_rate: 22.0, expected_readmission_rate: 20.0}
+          - {facility_id: "000002", measure_code: HF, discharges: null, excess_readmission_ratio: 1.1, predicted_readmission_rate: 22.0, expected_readmission_rate: 20.0}
+          - {facility_id: "000003", measure_code: HF, discharges: 10, excess_readmission_ratio: 0.9, predicted_readmission_rate: 18.0, expected_readmission_rate: 20.0}
+    expect:
+      rows:
+        - {facility_id: "000001", excess_readmissions: 4.0, is_reportable_volume: true, is_above_expected: true}
+        - {facility_id: "000002", excess_readmissions: null, is_reportable_volume: null, is_above_expected: true}
+        - {facility_id: "000003", excess_readmissions: -0.2, is_reportable_volume: false, is_above_expected: false}
+  - name: staging_pads_ids_and_nulls_suppression
+    model: stg_hrrp
+    given:
+      - input: source('raw', 'hrrp')
+        rows:
+          - {facility_id: "1234", measure_name: READM-30-AMI-HRRP, number_of_discharges: N/A, excess_readmission_ratio: "0.95", number_of_readmissions: Too Few to Report, start_date: 07/01/2021, end_date: 06/30/2024}
+    expect:
+      rows:
+        - {facility_id: "001234", measure_code: AMI, discharges: null, readmissions: null, excess_readmission_ratio: 0.95}

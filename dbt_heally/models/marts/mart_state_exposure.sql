@@ -7,7 +7,7 @@ select
     sum(discharges)                                                                   as discharges,
     round(sum(greatest(excess_readmissions, 0)), 2)                                   as excess_readmissions,
     round(1000.0 * sum(greatest(excess_readmissions, 0)) / nullif(sum(discharges), 0), 2) as excess_readmissions_per_1000_discharges,
-    round(sum(greatest(excess_readmissions, 0)) * {{ var('avertable_share') }} * {{ var('avg_readmission_cost_usd') }}, 0) as scenario_savings_usd
+    round(sum(greatest(excess_readmissions, 0)) * {{ var('avertable_share') }} * {{ var('avg_readmission_cost_usd') }}, 0) as scenario_savings_usd_period
 from {{ ref('fct_hospital_readmissions') }}
 where is_reportable_volume
 group by state
