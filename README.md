@@ -17,7 +17,7 @@ CMS CSV files
    v
 raw (DuckDB; Snowflake DDL written)
    |  dbt: staging (typed, suppression handled) -> intermediate (excess readmissions) -> marts
-   |  dbt tests: 29 data tests, 3 unit tests, 4 singular reconciliations; semantic layer metrics
+   |  dbt tests: 30 data tests, 3 unit tests, 5 singular reconciliations; semantic layer metrics
    v
 marts: dim_hospital, dim_measure, fct_hospital_readmissions, mart_hospital_scorecard,
        mart_state_exposure, mart_navigator_worklist, mart_business_case, mart_savings_sensitivity

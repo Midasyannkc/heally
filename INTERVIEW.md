@@ -12,7 +12,7 @@
 | Efficient, well-tested code, ELT automation | One command runs the whole flow and fails closed; a second run changes nothing | `heally/pipeline.py`, `tests/test_pipeline.py` |
 | Translate stakeholder needs | Question, decision, then model, metric and test | `docs/requirements.md` (hypothetical stakeholders, say so) |
 | Quality, accessibility, governance | Contracts, reconciliations, docs site, access roles | `docs/governance.md`, `docs/dbt_docs.html` |
-| Tests | 29 data tests, 3 unit tests, 4 singular reconciliations, plus pytest around the pipeline | `dbt_heally/tests/`, `tests/` |
+| Tests | 30 data tests, 3 unit tests, 5 singular reconciliations, plus pytest around the pipeline | `dbt_heally/tests/`, `tests/` |
 | Evaluate tools | Three evaluations with what was tried and what was only read | `docs/tool_evaluation.md` |
 | Troubleshoot and communicate | Runbook with escalation triggers; incident log | `docs/runbook.md`, `docs/incidents.md` |
 | Work with seniors | Open questions listed for review, not silently decided | `docs/design_review.md` |
