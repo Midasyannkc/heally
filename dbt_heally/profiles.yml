@@ -1,0 +1,18 @@
+heally:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('HEALLY_DB', 'out/heally.duckdb') }}"
+      threads: 4
+    # Written for Snowflake, never run: no Snowflake account was available while building.
+    snowflake:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT', '') }}"
+      user: "{{ env_var('SNOWFLAKE_USER', '') }}"
+      password: "{{ env_var('SNOWFLAKE_PASSWORD', '') }}"
+      role: TRANSFORMER
+      warehouse: TRANSFORMING
+      database: HEALLY
+      schema: ANALYTICS
+      threads: 4

@@ -1,0 +1,14 @@
+version: 2
+sources:
+  - name: raw
+    description: CMS Provider Data files landed as text by heally.sync (Fivetran-style loader). One table per file.
+    schema: raw
+    loaded_at_field: _synced_at
+    freshness:
+      warn_after: {count: 2, period: day}
+      error_after: {count: 7, period: day}
+    tables:
+      - name: hrrp
+        description: Hospital Readmissions Reduction Program, FY 2026. One row per hospital and measure. CMS dataset 9n3s-kdb3.
+      - name: hospital_info
+        description: Hospital General Information. One row per hospital. CMS dataset xubh-q36u.

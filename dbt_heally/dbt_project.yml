@@ -1,0 +1,33 @@
+name: heally
+version: "1.0.0"
+config-version: 2
+profile: heally
+model-paths: ["models"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+target-path: "../out/dbt_target"
+clean-targets: ["../out/dbt_target"]
+
+vars:
+  # Business assumptions, not CMS data. Change them in one place; every mart that uses them recomputes.
+  avg_readmission_cost_usd: 15000
+  avertable_share: 0.10
+  min_reportable_discharges: 25
+  tier_a_cumulative_share: 0.50
+  tier_b_cumulative_share: 0.80
+
+models:
+  heally:
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: view
+      +schema: intermediate
+    marts:
+      +materialized: table
+      +schema: marts
+seeds:
+  heally:
+    +schema: ref
